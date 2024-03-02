@@ -44,10 +44,11 @@ public class Runigram {
 		//// Replace the following statement with your code.
 		for (int i =0; i < image.length; i++){
 			for (int j = 0; j < image[0].length; i++){
-				int red = in.readInt();
-				int blue = in.readInt();
-				int green = in.readInt();
-				image [i][j] = new Color (red, green, blue);
+				int R = in.readInt();
+				int G = in.readInt();
+				int B = in.readInt();
+				Color color = new Color(R, G, B);
+				image[i][j] = color;
 			}
 		}
 		return image;
@@ -71,13 +72,8 @@ public class Runigram {
 		//// Replace this comment with your code
 		for (int i =0; i < image.length; i++){
 			for (int j = 0; j < image[0].length; i++){
-				System.out.print("(");
-				System.out.printf("%3s,", image[i][j].getRed());
-				System.out.printf("%3s,", image[i][j].getGreen());
-				System.out.printf("%3s",  image[i][j].getBlue());
-				System.out.print(")  ");
+				print (image[i][j]);
 			}
-			System.out.println();
 		}
 
 	}
@@ -115,8 +111,12 @@ public class Runigram {
 	// the three values r = lum, g = lum, b = lum.
 	public static Color luminance(Color pixel) {
 		//// Replace the following statement with your code
-		int lum = (int) ((0.299 * pixel.getRed()) + (0.587 * pixel.getGreen()) + (0.114 * pixel.getBlue()));
-		return (new Color(lum, lum, lum));
+		double R = (0.299 * (double) pixel.getRed());
+		double G = (0.587 * (double) pixel.getGreen());
+		double B = (0.114 * (double) pixel.getBlue());
+		int value = (int) (R + G + B);
+		Color new_pixel = new Color(value, value, value);
+		return new_pixel;
 	}
 	
 	/**
@@ -140,15 +140,16 @@ public class Runigram {
 	public static Color[][] scaled(Color[][] image, int width, int height) {
 		//// Replace the following statement with your code
 		Color [][] scaledImg = new Color [height][width];
+		int originalHeight = image.length;
+		int originalWidth = image[0].length;
+		double heightRatio = ((double) originalHeight / height);
+		double widthRatio = ((double) originalWidth / width);
 
-		double h0 = image.length, w0 = image[0].length;
-		double newHeight = (h0 / height);
-		double newWidth = (w0 / width);
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				int k = (int) (i * newHeight);
-				int l = (int) (j * newWidth);
-				scaledImg[i][j] = image[k][l];
+				int scaledHeight = (int) (i * heightRatio);
+				int scaledWidth = (int) (j * widthRatio);
+				scaledImg[i][j] = image[scaledHeight][scaledWidth];
 			}
 		}
 		return scaledImg;
@@ -162,9 +163,10 @@ public class Runigram {
 	 */
 	public static Color blend(Color c1, Color c2, double alpha) {
 		//// Replace the following statement with your code
-		Color blended = new Color( (int) (alpha * c1.getRed() + (1-alpha) * c2.getRed()),
-		(int) (alpha * c1.getGreen() + (1-alpha) * c2.getGreen()),
-		(int) (alpha * c1.getBlue() + (1-alpha) * c2.getBlue()));		
+		int R = (int) (c1.getRed() * alpha + c2.getRed() * (1 - alpha));
+		int G = (int) (c1.getGreen() * alpha + c2.getGreen() * (1 - alpha));
+		int B = (int) (c1.getBlue() * alpha + c2.getBlue() * (1 - alpha));
+		Color blended = new Color(R, G, B);
 
 		return blended;
 	}
@@ -194,16 +196,13 @@ public class Runigram {
 	 */
 	public static void morph(Color[][] source, Color[][] target, int n) {
 		//// Replace this comment with your code
-		double alpha = 0.0;
-		double n1 = (double) n;
-		//if images dont have same dimensions. we scale the target to the source's dimensions.
-		if (!(source.length == target.length && source[0].length == target[0].length)) 
+		if (source.length != target.length || source[0].length != target[0].length) {
 			target = scaled(target, source[0].length, source.length);
-		
-		for (int i = 0; i <= n; i++) {
-			alpha = (n1 - i) / n1;
-			Color bImage[][] = blend(source, target, alpha);
-			display(bImage);
+		}
+		for (int i = 1; i <= n; i++) {
+			double ratio = (double) i / n;
+			Color[][] morphed_image = blend(target, source, ratio);
+			display(morphed_image);
 			StdDraw.pause(500);
 		}
 	}
